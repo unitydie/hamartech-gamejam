@@ -1,0 +1,35 @@
+[
+  {
+    "title": "Fjord Runner",
+    "author": "Team Aurora",
+    "engine": "Unity",
+    "tags": [
+      "platformer",
+      "2D"
+    ],
+    "description": "En rask plattformprototype med korte nivåer og enkel fysikk.",
+    "link": "https://example.com"
+  },
+  {
+    "title": "Hamar Night Walk",
+    "author": "Solo Dev",
+    "engine": "Godot",
+    "tags": [
+      "story",
+      "atmosfære"
+    ],
+    "description": "Utforsk en liten natt-by og finn skjulte hint.",
+    "link": "https://example.com"
+  },
+  {
+    "title": "Scratch Quest",
+    "author": "Team Pixel",
+    "engine": "Scratch",
+    "tags": [
+      "nybegynner",
+      "kreativt"
+    ],
+    "description": "Et lite tekst/valg-spill laget i Scratch.",
+    "link": "https://example.com"
+  }
+]

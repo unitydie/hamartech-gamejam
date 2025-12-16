@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HamarTech GameJam</title>
+  <meta name="description" content="HamarTech GameJam – meld deg på, lag et spill, og send inn bidraget ditt." />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div id="torchOverlay" class="torch-overlay" aria-hidden="true">
+  <svg id="torchSvg" class="torch-svg" preserveAspectRatio="none">
+    <defs>
+      <filter id="torchBlur" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="18"></feGaussianBlur>
+      </filter>
+
+      <mask id="torchMask" maskUnits="userSpaceOnUse">
+        <rect id="torchMaskRect" x="0" y="0" width="100" height="100" fill="white"></rect>
+        <g id="torchMaskLights" filter="url(#torchBlur)"></g>
+      </mask>
+    </defs>
+
+    <rect id="torchDarkRect" x="0" y="0" width="100" height="100"
+          fill="rgba(0,0,0,0.92)" mask="url(#torchMask)"></rect>
+  </svg>
+</div>
+
+<div id="torchLayer" class="torch-layer" aria-hidden="true"></div>
+<div id="runner" class="runner" aria-hidden="true"></div>
+  <div class="page-transition" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">HamarTech <strong>GameJam</strong></span>
+    </a>
+
+    <nav class="nav" aria-label="Hovedmeny">
+      <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks">
+        <span class="sr-only">Åpne meny</span>
+        <span class="burger" aria-hidden="true"></span>
+      </button>
+      <div id="navLinks" class="nav-links">
+        <a class="nav-link" href="#info">Info</a>
+        <a class="nav-link" href="#tidsplan">Tidsplan</a>
+        <a class="nav-link" href="#regler">Regler</a>
+        <a class="nav-link" href="#premier">Utmerkelser</a>
+        <a class="nav-link" href="#paamelding">Påmelding</a>
+        <a class="nav-link" href="#innsending">Send inn</a>
+        <a class="nav-link" href="/projects.html">Prosjekter</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="pill">Lav terskel • Kreativt • 48 timer</p>
+          <h1 class="hero-title">Lag et spill.<br><span class="accent">Vis Hamar.</span></h1>
+
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#paamelding">Meld deg på</a>
+            <a class="btn btn-ghost" href="#innsending">Send inn</a>
+            <a class="btn btn-ghost" href="/projects.html">Se prosjekter</a>
+          </div>
+
+          <div class="countdown-card" role="group" aria-label="Nedtelling til innsending">
+            <div class="countdown-top">
+              <div>
+                <p class="deadline" id="deadlineText">—</p>
+              </div>
+              <button class="btn btn-mini" id="copyLinkBtn" type="button">Kopier lenke</button>
+            </div>
+            <div class="countdown" id="countdown" aria-live="polite">
+              <div class="time"><span id="d">00</span><span class="label">dager</span></div>
+              <div class="time"><span id="h">00</span><span class="label">timer</span></div>
+              <div class="time"><span id="m">00</span><span class="label">min</span></div>
+              <div class="time"><span id="s">00</span><span class="label">sek</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card reveal">
+          <div class="card glass">
+            <h2 class="h3">Tema</h2>
+            <p class="muted" id="themeText">Tema annonseres ved oppstart.</p>
+
+            <div class="divider"></div>
+
+            <h3 class="h4">Rask oversikt</h3>
+            <ul class="list">
+              <li><strong>Varighet:</strong> 48 timer</li>
+              <li><strong>Team:</strong> 1–4 personer</li>
+              <li><strong>Engine:</strong> Valgfritt (Unity, Godot, Scratch, Web, osv.)</li>
+              <li><strong>Leveranse:</strong> Spill-lenke (itch.io/GitHub) + kort beskrivelse</li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <div class="mini-grid">
+              <a class="mini-link" href="#regler">Les regler</a>
+              <a class="mini-link" href="#premier">Se utmerkelser</a>
+              <a class="mini-link" href="#faq">FAQ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="info" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Info</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <h3>Lav terskel</h3>
+            <p>Du trenger ikke være ekspert. Lag noe lite, lær noe nytt, og del det.</p>
+          </article>
+          <article class="feature reveal">
+            <h3>Bygg i ditt verktøy</h3>
+            <p>Bruk det du liker: Scratch, Unity, Godot, Roblox Studio, web, osv.</p>
+          </article>
+          <article class="feature reveal">
+            <h3>Synlighet etterpå</h3>
+            <p>Alle innsendelser samles på prosjektsiden så flere kan spille og se.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tidsplan" class="section alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Tidsplan</h2>
+        </div>
+
+        <ol class="timeline">
+          <li class="timeline-item reveal">
+            <div class="dot" aria-hidden="true"></div>
+            <div class="timeline-card">
+              <p class="kicker">Start</p>
+              <h3>Kickoff + tema slippes</h3>
+              <p class="muted">Kort intro, regler, og dere kan finne team.</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <div class="dot" aria-hidden="true"></div>
+            <div class="timeline-card">
+              <p class="kicker">Underveis</p>
+              <h3>Bygg, test og iterer</h3>
+              <p class="muted">Små mål. Fokus på en spillbar prototype.</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <div class="dot" aria-hidden="true"></div>
+            <div class="timeline-card">
+              <p class="kicker">Frist</p>
+              <h3>Send inn</h3>
+              <p class="muted">Last opp lenke og kort beskrivelse før nedtellingen er ferdig.</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <div class="dot" aria-hidden="true"></div>
+            <div class="timeline-card">
+              <p class="kicker">Etterpå</p>
+              <h3>Visning + utmerkelser</h3>
+              <p class="muted">Spill hverandres prosjekter og del favoritter.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="regler" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Regler</h2>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <h3>1) Team og deltakelse</h3>
+            <ul class="list">
+              <li>Team: 1–4 personer.</li>
+              <li>Du kan delta alene.</li>
+              <li>Vær hyggelig og inkluderende.</li>
+            </ul>
+          </article>
+
+          <article class="card reveal">
+            <h3>2) Hva skal sendes inn?</h3>
+            <ul class="list">
+              <li>En spillbar prototype.</li>
+              <li>Lenke til itch.io eller GitHub (anbefalt).</li>
+              <li>Kort beskrivelse + controls.</li>
+            </ul>
+          </article>
+
+          <article class="card reveal">
+            <h3>3) Innhold og rettigheter</h3>
+            <ul class="list">
+              <li>Bruk egne eller lovlige assets (CC/royalty-free).</li>
+              <li>Krediter musikk/lyd/bilder du bruker.</li>
+              <li>Innhold må være trygt og passende for arrangementet.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="premier" class="section alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Utmerkelser</h2>
+        </div>
+
+        <div class="badge-grid">
+          <div class="badge reveal">
+            <h3>Best gameplay</h3>
+            <p class="muted">Mest gøy å spille.</p>
+          </div>
+          <div class="badge reveal">
+            <h3>Best art/style</h3>
+            <p class="muted">Sterk visuell identitet.</p>
+          </div>
+          <div class="badge reveal">
+            <h3>Best nybegynner</h3>
+            <p class="muted">Bra innsats og læring.</p>
+          </div>
+          <div class="badge reveal">
+            <h3>Hamar spirit</h3>
+            <p class="muted">Kreativ bruk av tema/byen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paamelding" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Påmelding</h2>
+        </div>
+
+        <form class="form card reveal"
+          name="gamejam-register"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          action="/thank-you.html">
+          <input type="hidden" name="form-name" value="gamejam-register" />
+          <p class="sr-only">
+            <label>Ikke fyll ut: <input name="bot-field" /></label>
+          </p>
+
+          <div class="grid-2">
+            <label>
+              Navn
+              <input required name="name" autocomplete="name" />
+            </label>
+            <label>
+              E-post
+              <input required type="email" name="email" autocomplete="email" />
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label>
+              Teamnavn (valgfritt)
+              <input name="team" />
+            </label>
+            <label>
+              Antall i team
+              <select name="team_size">
+                <option>1</option><option>2</option><option>3</option><option>4</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Hvilke verktøy/engine bruker du?
+            <input name="tools" placeholder="f.eks. Unity, Godot, Scratch, Web..." />
+          </label>
+
+          <button class="btn btn-primary" type="submit">Send påmelding</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="innsending" class="section alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Send inn spill</h2>
+        </div>
+
+        <form class="form card reveal"
+          name="gamejam-submit"
+          method="POST"
+          enctype="multipart/form-data"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          action="/thank-you.html">
+          <input type="hidden" name="form-name" value="gamejam-submit" />
+          <p class="sr-only">
+            <label>Ikke fyll ut: <input name="bot-field" /></label>
+          </p>
+
+          <div class="grid-2">
+            <label>
+              Spilltittel
+              <input required name="title" />
+            </label>
+            <label>
+              Team/Skaper
+              <input required name="author" />
+            </label>
+          </div>
+
+          <label>
+            Kort beskrivelse (1–3 setninger)
+            <textarea required name="description" rows="4"></textarea>
+          </label>
+
+          <div class="grid-2">
+            <label>
+              Lenke (itch.io / GitHub / demo)
+              <input required type="url" name="link" placeholder="https://..." />
+            </label>
+            <label>
+              Engine/verktøy
+              <input name="engine" placeholder="Unity/Godot/Scratch/Web..." />
+            </label>
+          </div>
+
+          <label>
+            Fil (valgfritt)
+            <input type="file" name="file" />
+          </label>
+
+          <button class="btn btn-primary" type="submit" id="submitJamBtn">Send inn</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>FAQ</h2>
+        </div>
+
+        <div class="accordion card reveal">
+          <button class="acc-item" type="button" aria-expanded="false">
+            <span>Må jeg kunne kode?</span><span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="acc-panel">
+            <p>Nei. Du kan bruke Scratch eller verktøy du allerede kan. Målet er en liten prototype.</p>
+          </div>
+
+          <button class="acc-item" type="button" aria-expanded="false">
+            <span>Kan jeg delta alene?</span><span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="acc-panel">
+            <p>Ja! Team er valgfritt. 1–4 personer er anbefalt.</p>
+          </div>
+
+          <button class="acc-item" type="button" aria-expanded="false">
+            <span>Hvordan sender jeg inn?</span><span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="acc-panel">
+            <p>Fyll ut innsending-skjemaet med lenke til spillet (itch.io/GitHub). Kort beskrivelse og controls hjelper.</p>
+          </div>
+        </div>
+
+        <div class="contact reveal">
+          <p class="muted">Kontakt: <a href="mailto:kontakt@hamartech.no">kontakt@hamartech.no</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/assets/js/app.js" defer></script>
+</body>
+</html>

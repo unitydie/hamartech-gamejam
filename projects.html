@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prosjekter • HamarTech GameJam</title>
+  <meta name="description" content="Oversikt over innsendte prosjekter." />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+
+  <div class="page-transition" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">HamarTech <strong>GameJam</strong></span>
+    </a>
+    <nav class="nav" aria-label="Hovedmeny">
+      <a class="nav-link" href="/#paamelding">Påmelding</a>
+      <a class="nav-link" href="/#innsending">Send inn</a>
+      <a class="nav-link" href="/projects.html" aria-current="page">Prosjekter</a>
+    </nav>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <h1 class="h2">Prosjekter</h1>
+        <p class="muted">Denne siden viser eksempelprosjekter fra <code>assets/data/projects.json</code>.</p>
+        <p class="muted small">Merk: Netlify Forms lagrer innsendelser i dashboardet. Å vise dem automatisk på nettsiden krever ekstra integrasjon (API/Functions). Denne siden er derfor “bo-klar”, men prosjekter legges inn via JSON.</p>
+      </div>
+
+      <div class="toolbar card reveal">
+        <label class="search">
+          <span class="sr-only">Søk</span>
+          <input id="q" placeholder="Søk på tittel, team, engine..." />
+        </label>
+        <label>
+          Engine
+          <select id="engine">
+            <option value="">Alle</option>
+          </select>
+        </label>
+        <label>
+          Tag
+          <select id="tag">
+            <option value="">Alle</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="grid" class="project-grid"></div>
+      <div id="empty" class="empty card" hidden>
+        <p>Ingen treff. Prøv et annet søk.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="muted small">Tilbake til <a href="/">forsiden</a>.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/js/app.js" defer></script>
+  <script src="/assets/js/projects.js" defer></script>
+</body>
+</html>
