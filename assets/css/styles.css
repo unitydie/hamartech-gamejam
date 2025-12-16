@@ -438,7 +438,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   background-repeat: no-repeat;
   background-size: 400% 100%;
  
- background-image: url("./assets/img/runner.png");
+ background-image: url("../img/runner.png");
   background-repeat: no-repeat;
 }
 .runner.walking{
@@ -458,7 +458,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   image-rendering: pixelated;
   background-repeat: no-repeat;
   background-size: 400% 100%; 
- background-image: url("./assets/img/torch.png")
+ background-image: url("../img/torch.png");
 }
 .torch::before{
   /* зелёный ореол вокруг факела (не закрывает контент) */
