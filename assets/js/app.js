@@ -287,14 +287,6 @@ function burstEmbers(layer, x, y, n=16){
   }
 }
 
-function getOverlayXY(e){
-  const r = overlay.getBoundingClientRect();
-  return {
-    x: e.clientX - r.left,
-    y: e.clientY - r.top
-  };
-}
-
 function torchRunnerMode(){
   let tpx = 0, tpy = 0; 
   const overlay = document.getElementById("torchOverlay");
@@ -381,24 +373,18 @@ function torchRunnerMode(){
   runner.style.top  = ry + "px";
 
   // стартовый факел, чтобы сразу было что-то видно
-  addTorch(rx + window.scrollX, ry + window.scrollY);
+ addTorch(rx, ry);
 
 window.addEventListener("pointerdown", (e)=>{
   if(e.button !== 0) return;
   if(e.target.closest("a,button,input,textarea,select,label")) return;
 
-  // для бега по экрану
- const p = getOverlayXY(e);
-tx = p.x;
-ty = p.y;
-
-  // для установки факела в контенте
-  tpx = e.pageX;
-  tpy = e.pageY;
+  tx = e.clientX;
+  ty = e.clientY;
 
   moving = true;
   runner.classList.add("walking");
-});
+}, { capture: true });
 
   function stepRunner(){
     if(!moving) return;
@@ -414,7 +400,7 @@ ty = p.y;
       runner.classList.remove("walking");
 
       // поставить факел в точке
-      addTorch(tpx, tpy);
+      addTorch(tx, ty);
       return;
     }
 
@@ -431,7 +417,9 @@ ty = p.y;
     stepRunner();
 
     // flicker torches
-    for(const k of torches){
+for(const k of torches){
+  const sx = k.x - window.scrollX;
+  const sy = k.y - window.scrollY;
 
   k.el.style.left = sx + "px";
   k.el.style.top  = sy + "px";
