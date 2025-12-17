@@ -411,7 +411,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 }
 /* Overlay (darkness with holes) */
 .torch-overlay{
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 5000;
   pointer-events: none;
@@ -451,14 +451,14 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 
 /* Torch pixel art + animated flame */
 .torch{
-  position: absolute;
+  position: fixed; /* keep torches anchored when the page scrolls */
   width: 18px;
   height: 28px;
   transform: translate(-50%,-100%);
   image-rendering: pixelated;
   background-repeat: no-repeat;
-  background-size: 400% 100%; 
- background-image: url("/hamartech-gamejam/assets/img/torch.png");
+  background-size: 400% 100%;
+  background-image: url("/hamartech-gamejam/assets/img/torch.png");
 }
 .torch::before{
   /* зелёный ореол вокруг факела (не закрывает контент) */
