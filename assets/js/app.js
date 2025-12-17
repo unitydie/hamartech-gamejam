@@ -16,6 +16,8 @@ const JAM_CONFIG = {
   submitDeadline: "2026-01-15T18:00:00",
   timezoneLabel: "lokal tid",
 };
+const ASSET_BASE = location.pathname.includes("/hamartech-gamejam") ? "/hamartech-gamejam" : "";
+const assetPath = (p) => `${ASSET_BASE}${p}`;
 
 class Toast{
   constructor(el){
@@ -273,8 +275,8 @@ class TorchRunner{
     this.ready = !!(this.overlay && this.svg && this.maskRect && this.darkRect && this.lightsG && this.torchLayer && this.runner);
     if(!this.ready) return;
 
-    this.stepSfx = this.createAudio("/assets/sfx/step.ogg", true, 0.45);
-    this.fireSfx = this.createAudio("/assets/sfx/fire.mp3", true, 0.25);
+    this.stepSfx = this.createAudio(assetPath("/assets/sfx/step.ogg"), true, 0.45);
+    this.fireSfx = this.createAudio(assetPath("/assets/sfx/fire.mp3"), true, 0.25);
     this.audioUnlocked = false;
     this.firePlaying = false;
 
