@@ -571,6 +571,7 @@ class DragonGate{
     this.hitSfx = this.createAudio(assetPath("/assets/sfx/hit.mp3"), false, 0.75);
     this.fireballs = [];
     this.fireInterval = null;
+    this.arrows = [];
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
     this.el.style.setProperty("position", "fixed", "important");
@@ -624,23 +625,10 @@ class DragonGate{
     this.positionAt(x, y);
   }
   onClick(){
-    if(this.hitSfx){
-      this.hitSfx.currentTime = 0;
-      this.hitSfx.play().catch(()=>{});
-    }
-    this.clicks += 1;
-    if(this.clicks >= 5){
-      this.el.style.opacity = "0";
-      this.el.style.pointerEvents = "none";
-      window.removeEventListener("resize", this.onResize);
-      window.removeEventListener("scroll", this.onScroll);
-      this.stopFire();
-      if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
-        this.torchRunner.revealAll();
-      }
-      return;
-    }
-    this.setRandomPosition();
+    // fire arrow from runner towards dragon; only if runner alive
+    if(!this.torchRunner || !this.torchRunner.alive) return;
+    const runnerPos = this.torchRunner.getRunnerViewport();
+    this.spawnArrow(runnerPos.x, runnerPos.y, this.vx, this.vy);
   }
   onResize(){
     if(this.clicks === 0){
@@ -723,6 +711,82 @@ class DragonGate{
   destroyFireball(fb){
     fb.el.remove();
     this.fireballs = this.fireballs.filter(k=>k!==fb);
+  }
+
+  spawnArrow(sx, sy, tx, ty){
+    const el = document.createElement("div");
+    el.className = "arrow";
+    el.style.backgroundImage = `url("${assetPath("/assets/sfx/bullet.png")}")`;
+    el.style.left = sx + "px";
+    el.style.top  = sy + "px";
+    el.style.setProperty("position", "fixed", "important");
+    this.el.parentElement.appendChild(el);
+
+    const dx = tx - sx;
+    const dy = ty - sy;
+    const dist = Math.hypot(dx, dy) || 1;
+    const dirX = dx / dist;
+    const dirY = dy / dist;
+    const angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
+    el.style.transform = `translate(-50%,-50%) rotate(${angle}deg)`;
+
+    const speed = 700; // px/s
+    const arrow = { el, x: sx, y: sy };
+    this.arrows.push(arrow);
+
+    let last = null;
+    const step = (ts)=>{
+      if(!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+      arrow.x += dirX * speed * dt;
+      arrow.y += dirY * speed * dt;
+      el.style.left = arrow.x + "px";
+      el.style.top  = arrow.y + "px";
+
+      const d = Math.hypot((arrow.x - this.vx), (arrow.y - this.vy));
+      if(d < 28){
+        this.registerHit();
+        this.destroyArrow(arrow);
+        return;
+      }
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if(arrow.x < -80 || arrow.x > w + 80 || arrow.y < -80 || arrow.y > h + 80){
+        this.destroyArrow(arrow);
+        return;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  destroyArrow(ar){
+    ar.el.remove();
+    this.arrows = this.arrows.filter(k=>k!==ar);
+  }
+
+  registerHit(){
+    if(this.hitSfx){
+      this.hitSfx.currentTime = 0;
+      this.hitSfx.play().catch(()=>{});
+    }
+    this.clicks += 1;
+    if(this.clicks >= 5){
+      this.el.style.opacity = "0";
+      this.el.style.pointerEvents = "none";
+      window.removeEventListener("resize", this.onResize);
+      window.removeEventListener("scroll", this.onScroll);
+      this.stopFire();
+      this.arrows.forEach(a=>a.el.remove());
+      this.arrows = [];
+      if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
+        this.torchRunner.revealAll();
+      }
+      return;
+    }
+    this.setRandomPosition();
   }
 }
 
