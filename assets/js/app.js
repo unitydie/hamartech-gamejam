@@ -541,6 +541,9 @@ class DragonGate{
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
     this.el.style.setProperty("position", "fixed", "important");
+    this.el.style.setProperty("z-index", "6500", "important");
+    this.el.style.setProperty("pointer-events", "auto", "important");
+    this.el.style.setProperty("transform", "translate(-50%,-50%)", "important");
     this.setInitialPosition();
     this.onClick = this.onClick.bind(this);
     this.onResize = this.onResize.bind(this);
@@ -571,7 +574,9 @@ class DragonGate{
     this.el.style.right = "auto";
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
-    this.el.style.transform = "translate(-50%,-50%)";
+    this.el.style.setProperty("left", `${x}px`, "important");
+    this.el.style.setProperty("top", `${y}px`, "important");
+    this.el.style.setProperty("transform", "translate(-50%,-50%)", "important");
   }
   setRandomPosition(){
     const w = window.innerWidth;
