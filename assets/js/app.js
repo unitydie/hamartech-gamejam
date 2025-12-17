@@ -31,40 +31,6 @@ class Toast{
   }
 }
 
-class AudioManager{
-  constructor(){
-    this.ctx = null;
-    this.buffers = {};
-  }
-
-  async init(){
-    if(this.ctx) return;
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  async load(name, url){
-    const res = await fetch(url);
-    const buf = await res.arrayBuffer();
-    this.buffers[name] = await this.ctx.decodeAudioData(buf);
-  }
-
-  play(name, { loop=false, volume=0.6 } = {}){
-    if(!this.ctx || !this.buffers[name]) return null;
-
-    const src = this.ctx.createBufferSource();
-    const gain = this.ctx.createGain();
-
-    src.buffer = this.buffers[name];
-    src.loop = loop;
-    gain.gain.value = volume;
-
-    src.connect(gain).connect(this.ctx.destination);
-    src.start();
-
-    return { src, gain };
-  }
-}
-
 class PageTransition{
   constructor(){
     this.overlay = $(".page-transition");
@@ -327,11 +293,6 @@ class TorchRunner{
     this.stepRunner = this.stepRunner.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
 
-    this.audio = window.__jamAudio || null;
-    this.stepTimer = 0;
-    this.stepInterval = 280;
-    this.fireSounds = new Map();
-
     this.init();
   }
 
@@ -407,25 +368,13 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
       _emitEvery: 120 + Math.random()*220
     });
 
-    if(this.audio){
-  const fire = this.audio.play("fire", { loop:true, volume:0.25 });
-  this.fireSounds.set(t, fire);
-}
-
     this.burstEmbers(x, y - 18, 18);
 
     while(this.torches.length > this.MAX_TORCHES){
-  const old = this.torches.shift();
-  old.el.remove();
-  old.hole.remove();
-
-  // === SOUND cleanup ===
-  const fire = this.fireSounds.get(old.el);
-  if(fire){
-    fire.src.stop();
-    this.fireSounds.delete(old.el);
-  }
-}
+      const old = this.torches.shift();
+      old.el.remove();
+      old.hole.remove();
+    }
   }
 
   renderRunner(){
@@ -437,33 +386,26 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
 }
 
   spawnEmber(x, y){
-  const e = document.createElement("span");
-  e.className = "ember";
+    const e = document.createElement("span");
+    e.className = "ember";
+    const palette = ["#ffcf7a", "#ff9a4a", "#ff6a33"];
+    e.style.background = palette[(Math.random()*palette.length)|0];
+    const size = 2 + ((Math.random()*3)|0);
+    e.style.width = size + "px";
+    e.style.height = size + "px";
+    e.style.left = x + "px";
+    e.style.top  = y + "px";
+    this.torchLayer.appendChild(e);
 
-  const palette = ["#ffcf7a", "#ff9a4a", "#ff6a33"];
-  e.style.background = palette[(Math.random()*palette.length)|0];
-
-  const size = 2 + ((Math.random()*3)|0);
-  e.style.width = size + "px";
-  e.style.height = size + "px";
-
-  // 🔑 ВАЖНО
-  e.style.left = (x - window.scrollX) + "px";
-  e.style.top  = (y - window.scrollY) + "px";
-
-  this.torchLayer.appendChild(e);
-
-  const dx = (Math.random()-0.5) * 26;
-  const dy = -(18 + Math.random()*42);
-  const rot = (Math.random()*140 - 70);
-
-  e.animate([
-    { transform: "translate(-50%,-50%) translate(0,0) rotate(0deg)", opacity: 0.95 },
-    { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity: 0 }
-  ], { duration: 520 + Math.random()*420, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
-
-  setTimeout(()=> e.remove(), 1200);
-}
+    const dx = (Math.random()-0.5) * 26;
+    const dy = -(18 + Math.random()*42);
+    const rot = (Math.random()*140 - 70);
+    e.animate([
+      { transform: "translate(-50%,-50%) translate(0,0) rotate(0deg)", opacity: 0.95 },
+      { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity: 0 }
+    ], { duration: 520 + Math.random()*420, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+    setTimeout(()=> e.remove(), 1200);
+  }
 
   burstEmbers(x, y, n=16){
     for(let i=0;i<n;i++){
@@ -481,31 +423,22 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
   }
 
   stepRunner(){
-  if(!this.moving) return;
-
-  if(this.audio && performance.now() - this.stepTimer > this.stepInterval){
-    this.audio.play("step", { volume: 0.35 });
-    this.stepTimer = performance.now();
+    if(!this.moving) return;
+    const dx = this.tx - this.rx;
+    const dy = this.ty - this.ry;
+    const dist = Math.hypot(dx, dy);
+    const speed = Math.min(this.SPEED_MAX, Math.max(this.SPEED_MIN, dist * 0.08));
+    if(dist < 6){
+      this.rx = this.tx; this.ry = this.ty;
+      this.moving = false;
+      this.runner.classList.remove("walking");
+      this.addTorch(this.tx, this.ty);
+      return;
+    }
+    this.rx += (dx / dist) * speed;
+    this.ry += (dy / dist) * speed;
+    this.renderRunner();
   }
-
-  const dx = this.tx - this.rx;
-  const dy = this.ty - this.ry;
-  const dist = Math.hypot(dx, dy);
-  const speed = Math.min(this.SPEED_MAX, Math.max(this.SPEED_MIN, dist * 0.08));
-
-  if(dist < 6){
-    this.rx = this.tx;
-    this.ry = this.ty;
-    this.moving = false;
-    this.runner.classList.remove("walking");
-    this.addTorch(this.tx, this.ty);
-    return;
-  }
-
-  this.rx += (dx / dist) * speed;
-  this.ry += (dy / dist) * speed;
-  this.renderRunner();
-}
 
   tick(t){
     this.renderRunner();
@@ -533,17 +466,7 @@ class JamApp{
     this.config = { ...JAM_CONFIG, ...config };
     this.toast = new Toast($("#toast"));
   }
-  async init(){
-  this.audio = new AudioManager();
-  await this.audio.init();
-
-  await Promise.all([
-    this.audio.load("step", "/hamartech-gamejam/assets/sfx/step.oog"),
-    this.audio.load("fire", "/hamartech-gamejam/assets/sfx/fire.mp3")
-  ]);
-
-  window.__jamAudio = this.audio;
-
+  init(){
     const overlay = $(".page-transition");
     if(overlay){
       overlay.classList.add("on");
