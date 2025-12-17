@@ -300,8 +300,8 @@ class TorchRunner{
     this.lockLayers();
     this.resizeSvg();
     window.addEventListener("resize", this.resizeSvg);
-    this.runner.style.left = this.rx + "px";
-    this.runner.style.top  = this.ry + "px";
+    this.runner.style.left = (this.rx - window.scrollX) + "px";
+this.runner.style.top  = (this.ry - window.scrollY) + "px";
     this.addTorch(this.rx, this.ry);
     window.addEventListener("pointerdown", this.onPointerDown, { capture: true, passive: true });
     requestAnimationFrame(this.tick);
@@ -436,10 +436,11 @@ class TorchRunner{
   tick(t){
     this.stepRunner();
     for(const k of this.torches){
-      k.el.style.left = k.x + "px";
-      k.el.style.top  = k.y + "px";
-      k.hole.setAttribute("cx", k.x);
-      k.hole.setAttribute("cy", k.y);
+      k.el.style.left = (k.x - window.scrollX) + "px";
+      k.el.style.top  = (k.y - window.scrollY) + "px";
+
+      k.hole.setAttribute("cx", k.x - window.scrollX);
+      k.hole.setAttribute("cy", k.y - window.scrollY);
       const flick = Math.sin((t * 0.006) + k.seed) * this.FLICKER + (Math.random() - 0.5) * 6;
       k.hole.setAttribute("r", Math.max(120, k.baseR + flick));
       if(t - k._emitT > k._emitEvery){
