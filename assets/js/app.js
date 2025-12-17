@@ -848,6 +848,7 @@ class DragonGate{
       this.hitSfx.currentTime = 0;
       this.hitSfx.play().catch(()=>{});
     }
+    this.screenShake();
     this.clicks += 1;
     if(this.clicks >= 5){
       this.el.style.opacity = "0";
@@ -867,6 +868,16 @@ class DragonGate{
       return;
     }
     this.setRandomPosition();
+  }
+
+  screenShake(){
+    const root = document.documentElement;
+    root.style.setProperty("transition", "transform 0.12s ease");
+    root.style.setProperty("transform", "translate(3px, -3px)");
+    clearTimeout(this.shakeTimeout);
+    this.shakeTimeout = setTimeout(()=>{
+      root.style.setProperty("transform", "");
+    }, 140);
   }
 
   playFinAnimation(){
