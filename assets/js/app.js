@@ -249,8 +249,14 @@ class FormUX{
 /* Local storage for form submissions */
 function saveSubmission(entry){
   const now = new Date().toISOString();
-  const raw = localStorage.getItem(STORAGE_KEY);
-  const arr = raw ? JSON.parse(raw) : [];
+  let arr = [];
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    arr = raw ? JSON.parse(raw) : [];
+    if(!Array.isArray(arr)) arr = [];
+  }catch{
+    arr = [];
+  }
   arr.push({ ...entry, ts: now });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
 }
@@ -267,7 +273,13 @@ function attachLocalForms(){
       if(btn) btn.disabled = true;
       const data = new FormData(form);
       const payload = {};
-      data.forEach((v,k)=>{ payload[k] = v; });
+      data.forEach((v,k)=>{
+        if(v instanceof File){
+          if(v.name){ payload[k] = v.name; }
+        }else{
+          payload[k] = v;
+        }
+      });
       payload._form = name;
       saveSubmission(payload);
       toast("Sendt! Lagret lokalt.");
