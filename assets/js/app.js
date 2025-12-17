@@ -18,6 +18,7 @@ const JAM_CONFIG = {
 };
 const ASSET_BASE = location.pathname.includes("/hamartech-gamejam") ? "/hamartech-gamejam" : "";
 const assetPath = (p) => `${ASSET_BASE}${p}`;
+const STORAGE_KEY = "jam_submissions_v1";
 
 class Toast{
   constructor(el){
@@ -243,6 +244,40 @@ class FormUX{
       Confetti.burst();
     }
   }
+}
+
+/* Local storage for form submissions */
+function saveSubmission(entry){
+  const now = new Date().toISOString();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  arr.push({ ...entry, ts: now });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+function attachLocalForms(){
+  const registerForm = document.forms["gamejam-register"];
+  const submitForm = document.forms["gamejam-submit"];
+
+  const bind = (form, name)=>{
+    if(!form) return;
+    form.addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const btn = form.querySelector("button[type=submit]");
+      if(btn) btn.disabled = true;
+      const data = new FormData(form);
+      const payload = {};
+      data.forEach((v,k)=>{ payload[k] = v; });
+      payload._form = name;
+      saveSubmission(payload);
+      toast("Sendt! Lagret lokalt.");
+      form.reset();
+      if(btn) btn.disabled = false;
+    });
+  };
+
+  bind(registerForm, "register");
+  bind(submitForm, "submit");
 }
 
 class CardTilt{
@@ -939,6 +974,7 @@ class JamApp{
     new CopyLink(this.toast);
     new Countdown(this.config);
     new FormUX(this.toast);
+    attachLocalForms();
     new CardTilt();
     this.torchRunner = new TorchRunner();
     this.dragonGate = new DragonGate(this.torchRunner);
