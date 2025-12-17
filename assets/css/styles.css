@@ -16,7 +16,7 @@
 }
 
 *{ box-sizing:border-box; }
-html, body { margin: 0; padding: 0; }
+html,body{ height:100%; }
 body{
   background: radial-gradient(1200px 700px at 20% -10%, rgba(124,244,255,.10), transparent 55%),
               radial-gradient(900px 600px at 80% 0%, rgba(182,140,255,.10), transparent 55%),

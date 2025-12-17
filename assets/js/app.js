@@ -287,6 +287,14 @@ function burstEmbers(layer, x, y, n=16){
   }
 }
 
+function getOverlayXY(e){
+  const r = overlay.getBoundingClientRect();
+  return {
+    x: e.clientX - r.left,
+    y: e.clientY - r.top
+  };
+}
+
 function torchRunnerMode(){
   let tpx = 0, tpy = 0; 
   const overlay = document.getElementById("torchOverlay");
@@ -380,8 +388,9 @@ window.addEventListener("pointerdown", (e)=>{
   if(e.target.closest("a,button,input,textarea,select,label")) return;
 
   // для бега по экрану
-  tx = e.clientX;
-  ty = e.clientY;
+ const p = getOverlayXY(e);
+tx = p.x;
+ty = p.y;
 
   // для установки факела в контенте
   tpx = e.pageX;
@@ -423,8 +432,6 @@ window.addEventListener("pointerdown", (e)=>{
 
     // flicker torches
     for(const k of torches){
-  const sx = k.x - window.scrollX;
-  const sy = k.y - window.scrollY;
 
   k.el.style.left = sx + "px";
   k.el.style.top  = sy + "px";
