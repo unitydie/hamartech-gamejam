@@ -273,6 +273,11 @@ class TorchRunner{
     this.ready = !!(this.overlay && this.svg && this.maskRect && this.darkRect && this.lightsG && this.torchLayer && this.runner);
     if(!this.ready) return;
 
+    this.stepSfx = this.createAudio("/assets/sfx/step.ogg", true, 0.45);
+    this.fireSfx = this.createAudio("/assets/sfx/fire.mp3", true, 0.25);
+    this.audioUnlocked = false;
+    this.firePlaying = false;
+
     this.MAX_TORCHES = 7;
     this.BASE_R = 220;
     this.FLICKER = 18;
@@ -301,10 +306,19 @@ class TorchRunner{
     this.resizeSvg();
     window.addEventListener("resize", this.resizeSvg);
     this.runner.style.left = (this.rx - window.scrollX) + "px";
-this.runner.style.top  = (this.ry - window.scrollY) + "px";
+    this.runner.style.top  = (this.ry - window.scrollY) + "px";
     this.addTorch(this.rx, this.ry);
     window.addEventListener("pointerdown", this.onPointerDown, { capture: true, passive: true });
     requestAnimationFrame(this.tick);
+  }
+
+  createAudio(src, loop=false, volume=1){
+    const a = new Audio(src);
+    a.loop = loop;
+    a.volume = volume;
+    a.preload = "auto";
+    a.crossOrigin = "anonymous";
+    return a;
   }
 
   lockLayers(){
@@ -325,6 +339,30 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
     this.runner.style.setProperty("position", "fixed", "important");
     this.runner.style.setProperty("pointer-events", "none", "important");
     this.runner.style.setProperty("z-index", "6000", "important");
+  }
+
+  unlockAudio(){
+    if(this.audioUnlocked) return;
+    this.audioUnlocked = true;
+    this.ensureFireLoop();
+  }
+
+  playStepLoop(){
+    if(!this.stepSfx) return;
+    this.stepSfx.play().catch(()=>{});
+  }
+
+  stopStepLoop(){
+    if(!this.stepSfx) return;
+    this.stepSfx.pause();
+    this.stepSfx.currentTime = 0;
+  }
+
+  ensureFireLoop(){
+    if(this.firePlaying) return;
+    if(!this.fireSfx) return;
+    if(this.torches.length === 0) return;
+    this.fireSfx.play().then(()=>{ this.firePlaying = true; }).catch(()=>{});
   }
 
   resizeSvg(){
@@ -369,6 +407,7 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
     });
 
     this.burstEmbers(x, y - 18, 18);
+    this.ensureFireLoop();
 
     while(this.torches.length > this.MAX_TORCHES){
       const old = this.torches.shift();
@@ -416,9 +455,11 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
   onPointerDown(e){
     if(e.button !== 0) return;
     if(e.target.closest("a,button,input,textarea,select,label")) return;
+    this.unlockAudio();
     this.tx = e.clientX + window.scrollX;
     this.ty = e.clientY + window.scrollY;
     this.moving = true;
+    this.playStepLoop();
     this.runner.classList.add("walking");
   }
 
@@ -431,6 +472,7 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
     if(dist < 6){
       this.rx = this.tx; this.ry = this.ty;
       this.moving = false;
+      this.stopStepLoop();
       this.runner.classList.remove("walking");
       this.addTorch(this.tx, this.ty);
       return;
