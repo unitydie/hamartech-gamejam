@@ -575,6 +575,9 @@ class DragonGate{
     this.fireInterval = null;
     this.arrows = [];
     this.finTimeout = null;
+    this.wanderId = null;
+    this.wanderSpeed = 40; // px/s
+    this.wanderTarget = null;
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
     this.el.style.setProperty("position", "fixed", "important");
@@ -591,6 +594,7 @@ class DragonGate{
     window.addEventListener("scroll", this.onScroll, { passive: true });
     document.addEventListener("click", this.unlockMusic, { capture: true, passive: true });
     this.startFire();
+    this.startWander();
   }
   createAudio(src, loop=false, volume=1){
     const a = new Audio(src);
@@ -628,6 +632,51 @@ class DragonGate{
     const x = margin + Math.random() * (maxX - margin);
     const y = margin + Math.random() * (maxY - margin);
     this.positionAt(x, y);
+  }
+  startWander(){
+    if(this.wanderId) return;
+    this.pickNewTarget();
+    let last = null;
+    const step = (ts)=>{
+      if(!this.el) return;
+      if(!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+      if(this.wanderTarget){
+        const dx = this.wanderTarget.x - this.vx;
+        const dy = this.wanderTarget.y - this.vy;
+        const dist = Math.hypot(dx, dy);
+        if(dist < 4){
+          this.pickNewTarget();
+        }else{
+          const move = this.wanderSpeed * dt;
+          const nx = this.vx + (dx / dist) * move;
+          const ny = this.vy + (dy / dist) * move;
+          this.positionAt(nx, ny);
+        }
+      }
+      this.wanderId = requestAnimationFrame(step);
+    };
+    this.wanderId = requestAnimationFrame(step);
+  }
+
+  pickNewTarget(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const size = this.el.offsetWidth || 140;
+    const margin = 30;
+    const maxX = Math.max(margin, w - margin - size);
+    const maxY = Math.max(margin, h - margin - size);
+    const x = margin + Math.random() * (maxX - margin);
+    const y = margin + Math.random() * (maxY - margin);
+    this.wanderTarget = { x, y };
+  }
+
+  stopWander(){
+    if(this.wanderId){
+      cancelAnimationFrame(this.wanderId);
+      this.wanderId = null;
+    }
   }
   onClick(){
     // fire arrow from runner towards dragon; only if runner alive
@@ -804,6 +853,7 @@ class DragonGate{
       window.removeEventListener("scroll", this.onScroll);
       this.stopFire();
       this.stopMusic();
+      this.stopWander();
       this.arrows.forEach(a=>a.el.remove());
       this.arrows = [];
       this.playFinAnimation().then(()=>{
