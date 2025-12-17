@@ -418,6 +418,21 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   pointer-events: none;
 }
 
+.dragon{
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 140px;
+  height: 140px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  z-index: 6500;
+  pointer-events: auto;
+  image-rendering: pixelated;
+}
+
 /* Pixel-art runner sprite (2 frames) */
 .runner{
   position: fixed;

@@ -279,6 +279,7 @@ class TorchRunner{
     this.fireSfx = this.createAudio(assetPath("/assets/sfx/fire.mp3"), true, 0.25);
     this.audioUnlocked = false;
     this.firePlaying = false;
+    this.active = true;
 
     this.MAX_TORCHES = 7;
     this.BASE_R = 220;
@@ -367,6 +368,13 @@ class TorchRunner{
     this.fireSfx.play().then(()=>{ this.firePlaying = true; }).catch(()=>{});
   }
 
+  stopFireLoop(){
+    if(!this.fireSfx) return;
+    this.fireSfx.pause();
+    this.fireSfx.currentTime = 0;
+    this.firePlaying = false;
+  }
+
   resizeSvg(){
     this.w = window.innerWidth;
     this.h = window.innerHeight;
@@ -378,6 +386,7 @@ class TorchRunner{
   }
 
   addTorch(x, y){
+    if(!this.active) return;
     const t = document.createElement("div");
     t.className = "torch";
     t.style.setProperty("position", "fixed", "important");
@@ -419,12 +428,11 @@ class TorchRunner{
   }
 
   renderRunner(){
-  const x = this.rx - window.scrollX;
-  const y = this.ry - window.scrollY;
-
-  this.runner.style.left = x + "px";
-  this.runner.style.top  = y + "px";
-}
+    const x = this.rx - window.scrollX;
+    const y = this.ry - window.scrollY;
+    this.runner.style.left = x + "px";
+    this.runner.style.top  = y + "px";
+  }
 
   spawnEmber(x, y){
     const e = document.createElement("span");
@@ -485,6 +493,7 @@ class TorchRunner{
   }
 
   tick(t){
+    if(!this.active) return;
     this.renderRunner();
     this.stepRunner();
     for(const k of this.torches){
@@ -502,6 +511,44 @@ class TorchRunner{
       }
     }
     requestAnimationFrame(this.tick);
+  }
+
+  revealAll(){
+    if(!this.active) return;
+    this.active = false;
+    window.removeEventListener("pointerdown", this.onPointerDown, { capture: true });
+    this.stopStepLoop();
+    this.stopFireLoop();
+    this.overlay.style.display = "none";
+    this.torchLayer.style.display = "none";
+    this.runner.style.display = "none";
+    this.torches.forEach(k=>{
+      k.el.remove();
+      k.hole.remove();
+    });
+    this.torches = [];
+  }
+}
+
+class DragonGate{
+  constructor(torchRunner){
+    this.el = document.getElementById("dragon");
+    this.torchRunner = torchRunner;
+    this.clicks = 0;
+    if(!this.el) return;
+    this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
+    this.onClick = this.onClick.bind(this);
+    this.el.addEventListener("click", this.onClick);
+  }
+  onClick(){
+    this.clicks += 1;
+    if(this.clicks >= 5){
+      this.el.style.opacity = "0";
+      this.el.style.pointerEvents = "none";
+      if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
+        this.torchRunner.revealAll();
+      }
+    }
   }
 }
 
@@ -527,6 +574,7 @@ class JamApp{
     new FormUX(this.toast);
     new CardTilt();
     this.torchRunner = new TorchRunner();
+    this.dragonGate = new DragonGate(this.torchRunner);
   }
 }
 
