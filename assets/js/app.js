@@ -377,6 +377,14 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
     }
   }
 
+  renderRunner(){
+  const x = this.rx - window.scrollX;
+  const y = this.ry - window.scrollY;
+
+  this.runner.style.left = x + "px";
+  this.runner.style.top  = y + "px";
+}
+
   spawnEmber(x, y){
     const e = document.createElement("span");
     e.className = "ember";
@@ -429,11 +437,11 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
     }
     this.rx += (dx / dist) * speed;
     this.ry += (dy / dist) * speed;
-    this.runner.style.left = this.rx + "px";
-    this.runner.style.top  = this.ry + "px";
+    this.renderRunner();
   }
 
   tick(t){
+    this.renderRunner();
     this.stepRunner();
     for(const k of this.torches){
       k.el.style.left = (k.x - window.scrollX) + "px";
