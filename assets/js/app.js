@@ -808,15 +808,23 @@ class DragonGate{
       video.style.pointerEvents = "none";
       video.style.background = "black";
 
+      const audio = new Audio(assetPath("/assets/sfx/on.mp3"));
+      audio.autoplay = true;
+      audio.volume = 0.8;
+      audio.preload = "auto";
+
       const cleanup = ()=>{
         clearTimeout(this.finTimeout);
         video.remove();
+        audio.pause();
+        audio.currentTime = 0;
         resolve();
       };
 
       video.addEventListener("ended", cleanup, { once: true });
       document.body.appendChild(video);
       video.play().catch(()=>{ cleanup(); });
+      audio.play().catch(()=>{});
       // Fallback in case ended doesn't fire
       this.finTimeout = setTimeout(cleanup, 6000);
     });
