@@ -433,6 +433,19 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   image-rendering: pixelated;
 }
 
+.fireball{
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 6400;
+  image-rendering: pixelated;
+  transform: translate(-50%,-50%);
+}
+
 /* Pixel-art runner sprite (2 frames) */
 .runner{
   position: fixed;

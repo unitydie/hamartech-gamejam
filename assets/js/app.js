@@ -280,6 +280,8 @@ class TorchRunner{
     this.audioUnlocked = false;
     this.firePlaying = false;
     this.active = true;
+    this.alive = true;
+    this.respawnDelay = 1200;
 
     this.MAX_TORCHES = 7;
     this.BASE_R = 220;
@@ -373,6 +375,33 @@ class TorchRunner{
     this.fireSfx.pause();
     this.fireSfx.currentTime = 0;
     this.firePlaying = false;
+  }
+
+  getRunnerViewport(){
+    return { x: this.rx - window.scrollX, y: this.ry - window.scrollY, alive: this.alive };
+  }
+
+  die(){
+    if(!this.alive) return;
+    this.alive = false;
+    this.moving = false;
+    this.stopStepLoop();
+    this.runner.style.opacity = "0";
+    this.runner.classList.remove("walking");
+    setTimeout(()=> this.respawn(), this.respawnDelay);
+  }
+
+  respawn(){
+    this.rx = this.w * 0.5 + window.scrollX;
+    this.ry = this.h * 0.6 + window.scrollY;
+    this.tx = this.rx;
+    this.ty = this.ry;
+    this.renderRunner();
+    this.runner.style.opacity = "1";
+    this.alive = true;
+    if(this.active){
+      this.addTorch(this.rx, this.ry);
+    }
   }
 
   resizeSvg(){
@@ -538,6 +567,8 @@ class DragonGate{
     this.vx = 0;
     this.vy = 0;
     this.hitSfx = this.createAudio(assetPath("/assets/sfx/hit.mp3"), false, 0.75);
+    this.fireballs = [];
+    this.fireInterval = null;
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
     this.el.style.setProperty("position", "fixed", "important");
@@ -551,6 +582,7 @@ class DragonGate{
     this.el.addEventListener("click", this.onClick);
     window.addEventListener("resize", this.onResize);
     window.addEventListener("scroll", this.onScroll, { passive: true });
+    this.startFire();
   }
   createAudio(src, loop=false, volume=1){
     const a = new Audio(src);
@@ -600,6 +632,7 @@ class DragonGate{
       this.el.style.pointerEvents = "none";
       window.removeEventListener("resize", this.onResize);
       window.removeEventListener("scroll", this.onScroll);
+      this.stopFire();
       if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
         this.torchRunner.revealAll();
       }
@@ -615,6 +648,79 @@ class DragonGate{
   onScroll(){
     // keep dragon locked to viewport coords even if layout changes with scroll
     this.positionAt(this.vx, this.vy);
+  }
+
+  startFire(){
+    if(this.fireInterval) return;
+    this.fireInterval = setInterval(()=> this.shootFireball(), 1000);
+  }
+
+  stopFire(){
+    if(this.fireInterval){
+      clearInterval(this.fireInterval);
+      this.fireInterval = null;
+    }
+    this.fireballs.forEach(fb=> fb.el.remove());
+    this.fireballs = [];
+  }
+
+  shootFireball(){
+    if(!this.torchRunner || !this.torchRunner.active) return;
+    const runnerPos = this.torchRunner.getRunnerViewport();
+    if(!runnerPos.alive) return;
+    const startX = this.vx;
+    const startY = this.vy;
+    const dx = runnerPos.x - startX;
+    const dy = runnerPos.y - startY;
+    const dist = Math.hypot(dx, dy) || 1;
+    const dirX = dx / dist;
+    const dirY = dy / dist;
+    const speed = 520; // px/s
+    const el = document.createElement("div");
+    el.className = "fireball";
+    el.style.backgroundImage = `url("${assetPath("/assets/sfx/fireball.png")}")`;
+    el.style.left = startX + "px";
+    el.style.top  = startY + "px";
+    el.style.setProperty("position", "fixed", "important");
+    this.el.parentElement.appendChild(el);
+
+    const fb = { el, x: startX, y: startY };
+    this.fireballs.push(fb);
+
+    let last = null;
+    const step = (ts)=>{
+      if(!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+      fb.x += dirX * speed * dt;
+      fb.y += dirY * speed * dt;
+      el.style.left = fb.x + "px";
+      el.style.top  = fb.y + "px";
+
+      const rPos = this.torchRunner.getRunnerViewport();
+      if(rPos.alive){
+        const d = Math.hypot((fb.x - rPos.x), (fb.y - rPos.y));
+        if(d < 24){
+          this.torchRunner.die();
+          this.destroyFireball(fb);
+          return;
+        }
+      }
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if(fb.x < -60 || fb.x > w + 60 || fb.y < -60 || fb.y > h + 60){
+        this.destroyFireball(fb);
+        return;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  destroyFireball(fb){
+    fb.el.remove();
+    this.fireballs = this.fireballs.filter(k=>k!==fb);
   }
 }
 
