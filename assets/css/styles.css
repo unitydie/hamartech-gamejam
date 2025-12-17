@@ -420,9 +420,9 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 
 .dragon{
   position: fixed;
-  right: 24px;
   top: 50%;
-  transform: translateY(-50%);
+  left: calc(100% - 70px);
+  transform: translate(-50%,-50%);
   width: 140px;
   height: 140px;
   background-repeat: no-repeat;

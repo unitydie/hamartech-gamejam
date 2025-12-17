@@ -535,19 +535,68 @@ class DragonGate{
     this.el = document.getElementById("dragon");
     this.torchRunner = torchRunner;
     this.clicks = 0;
+    this.hitSfx = this.createAudio(assetPath("/assets/sfx/hit.mp3"), false, 0.75);
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
+    this.setInitialPosition();
     this.onClick = this.onClick.bind(this);
+    this.onResize = this.onResize.bind(this);
     this.el.addEventListener("click", this.onClick);
+    window.addEventListener("resize", this.onResize);
+  }
+  createAudio(src, loop=false, volume=1){
+    const a = new Audio(src);
+    a.loop = loop;
+    a.volume = volume;
+    a.preload = "auto";
+    a.crossOrigin = "anonymous";
+    return a;
+  }
+  setInitialPosition(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const size = this.el.offsetWidth || 140;
+    const x = Math.max(0, w - size * 0.5 - 24);
+    const y = h * 0.5;
+    this.positionAt(x, y);
+  }
+  positionAt(x, y){
+    this.el.style.right = "auto";
+    this.el.style.left = `${x}px`;
+    this.el.style.top = `${y}px`;
+    this.el.style.transform = "translate(-50%,-50%)";
+  }
+  setRandomPosition(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const size = this.el.offsetWidth || 140;
+    const margin = 30;
+    const maxX = Math.max(margin, w - margin - size);
+    const maxY = Math.max(margin, h - margin - size);
+    const x = margin + Math.random() * (maxX - margin);
+    const y = margin + Math.random() * (maxY - margin);
+    this.positionAt(x, y);
   }
   onClick(){
+    if(this.hitSfx){
+      this.hitSfx.currentTime = 0;
+      this.hitSfx.play().catch(()=>{});
+    }
     this.clicks += 1;
     if(this.clicks >= 5){
       this.el.style.opacity = "0";
       this.el.style.pointerEvents = "none";
+      window.removeEventListener("resize", this.onResize);
       if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
         this.torchRunner.revealAll();
       }
+      return;
+    }
+    this.setRandomPosition();
+  }
+  onResize(){
+    if(this.clicks === 0){
+      this.setInitialPosition();
     }
   }
 }
