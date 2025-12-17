@@ -15,6 +15,15 @@ function renderLocal(){
   if(!grid) return;
 
   const submissions = loadLocalSubmissions().filter(s=>s._form === "submit");
+  if(submissions.length === 0){
+    grid.innerHTML = "";
+    if(empty){
+      empty.hidden = false;
+      empty.innerHTML = `<p>Ingen lokale innsendinger ennå. Send inn fra forsiden og åpne denne siden i samme nettleser.</p>`;
+    }
+    return;
+  }
+
   grid.innerHTML = submissions.map(s=>{
     const safe = (v="")=> String(v).replaceAll("<","&lt;").replaceAll(">","&gt;");
     const tags = (s.tags || s.engine || "").toString();
@@ -32,7 +41,7 @@ function renderLocal(){
     `;
   }).join("");
 
-  if(empty) empty.hidden = submissions.length !== 0;
+  if(empty) empty.hidden = true;
 }
 
 document.addEventListener("DOMContentLoaded", ()=> renderLocal());
