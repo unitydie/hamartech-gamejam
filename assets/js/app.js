@@ -288,7 +288,6 @@ function burstEmbers(layer, x, y, n=16){
 }
 
 function torchRunnerMode(){
-  let tpx = 0, tpy = 0; 
   const overlay = document.getElementById("torchOverlay");
   const svg = document.getElementById("torchSvg");
   const maskRect = document.getElementById("torchMaskRect");
@@ -298,9 +297,9 @@ function torchRunnerMode(){
   const runner = document.getElementById("runner");
   if(!overlay || !svg || !maskRect || !darkRect || !lightsG || !torchLayer || !runner) return;
 
-  const MAX_TORCHES = 7;         // сколько факелов максимум
-  const BASE_R = 220;            // базовый радиус света
-  const FLICKER = 18;            // амплитуда мерцания
+  const MAX_TORCHES = 7;
+  const BASE_R = 220;
+  const FLICKER = 18;
   const SPEED_MIN = 7;
   const SPEED_MAX = 18;
 
@@ -317,54 +316,52 @@ function torchRunnerMode(){
   resizeSvg();
   window.addEventListener("resize", resizeSvg);
 
-  // torches state
-  const torches = []; // {x,y,baseR,seed,el,inner,outer}
+  const torches = []; // {x,y,baseR,seed,el,hole,_emitT,_emitEvery}
 
   function addTorch(x, y){
-  // x,y приходят как clientX/clientY (координаты окна)
-  const pageX = x + window.scrollX;
-  const pageY = y + window.scrollY;
+    // DOM torch
+    const t = document.createElement("div");
+    t.className = "torch";
+    t.style.left = x + "px";
+    t.style.top  = y + "px";
 
-  // DOM torch
-  const t = document.createElement("div");
-  t.className = "torch";
-  t.style.left = x + "px";
-  t.style.top  = y + "px";
-  torchLayer.appendChild(t);
+    // если хочешь огонь отдельным элементом — раскомментируй:
+    // const flame = document.createElement("span");
+    // flame.className = "flame";
+    // t.appendChild(flame);
 
-  // SVG hole (дырка в темноте)
-  const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  hole.setAttribute("cx", x);
-  hole.setAttribute("cy", y);
-  hole.setAttribute("r", BASE_R);
-  hole.setAttribute("fill", "black");
-  lightsG.appendChild(hole);
+    torchLayer.appendChild(t);
 
-  // сохранить
-  torches.push({
-    x: pageX,     // храним page coords
-    y: pageY,
-    baseR: BASE_R,
-    seed: Math.random() * 1000,
-    el: t,
-    hole,
-    _emitT: 0,
-    _emitEvery: 120 + Math.random()*220
-  });
+    // SVG hole (дырка в темноте)
+    const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    hole.setAttribute("cx", x);
+    hole.setAttribute("cy", y);
+    hole.setAttribute("r", BASE_R);
+    hole.setAttribute("fill", "black");
+    lightsG.appendChild(hole);
 
-  // pop particles (в координатах окна)
-  burstEmbers(torchLayer, x, y - 18, 18);
+    torches.push({
+      x, y,
+      baseR: BASE_R,
+      seed: Math.random()*1000,
+      el: t,
+      hole,
+      _emitT: 0,
+      _emitEvery: 120 + Math.random()*220
+    });
 
-  // лимит
-  while(torches.length > MAX_TORCHES){
-    const old = torches.shift();
-    if(old.el) old.el.remove();
-    if(old.hole) old.hole.remove();
+    // искры при установке
+    burstEmbers(torchLayer, x, y - 18, 18);
+
+    // limit
+    while(torches.length > MAX_TORCHES){
+      const old = torches.shift();
+      old.el.remove();
+      old.hole.remove();
+    }
   }
-}
 
-
-  // Runner movement
+  // runner movement (по экрану)
   let rx = w * 0.5, ry = h * 0.6;
   let tx = rx, ty = ry;
   let moving = false;
@@ -372,19 +369,20 @@ function torchRunnerMode(){
   runner.style.left = rx + "px";
   runner.style.top  = ry + "px";
 
-  // стартовый факел, чтобы сразу было что-то видно
- addTorch(rx, ry);
+  // стартовый факел
+  addTorch(rx, ry);
 
-window.addEventListener("pointerdown", (e)=>{
-  if(e.button !== 0) return;
-  if(e.target.closest("a,button,input,textarea,select,label")) return;
+  // ставим цель кликом
+  window.addEventListener("pointerdown", (e)=>{
+    if(e.button !== 0) return;
+    if(e.target.closest("a,button,input,textarea,select,label")) return;
 
-  tx = e.clientX;
-  ty = e.clientY;
+    tx = e.clientX;
+    ty = e.clientY;
 
-  moving = true;
-  runner.classList.add("walking");
-}, { capture: true });
+    moving = true;
+    runner.classList.add("walking");
+  }, { capture: true });
 
   function stepRunner(){
     if(!moving) return;
@@ -398,8 +396,6 @@ window.addEventListener("pointerdown", (e)=>{
       rx = tx; ry = ty;
       moving = false;
       runner.classList.remove("walking");
-
-      // поставить факел в точке
       addTorch(tx, ty);
       return;
     }
@@ -411,37 +407,32 @@ window.addEventListener("pointerdown", (e)=>{
     runner.style.top  = ry + "px";
   }
 
-  // Flicker (and keep circles updated)
   function tick(t){
-    // runner
     stepRunner();
 
-    // flicker torches
-for(const k of torches){
-  const sx = k.x - window.scrollX;
-  const sy = k.y - window.scrollY;
+    for(const k of torches){
+      // держим факелы на экране (НЕ зависит от scroll)
+      k.el.style.left = k.x + "px";
+      k.el.style.top  = k.y + "px";
+      k.hole.setAttribute("cx", k.x);
+      k.hole.setAttribute("cy", k.y);
 
-  k.el.style.left = sx + "px";
-  k.el.style.top  = sy + "px";
-  k.hole.setAttribute("cx", sx);
-  k.hole.setAttribute("cy", sy);
+      // мерцание (фликер)
+      const flick = Math.sin((t * 0.006) + k.seed) * FLICKER + (Math.random() - 0.5) * 6;
+      k.hole.setAttribute("r", Math.max(120, k.baseR + flick));
 
-  const flick = Math.sin((t * 0.006) + k.seed) * FLICKER + (Math.random() - 0.5) * 6;
-  k.hole.setAttribute("r", Math.max(120, k.baseR + flick));
-
-  if(t - k._emitT > k._emitEvery){
-    spawnEmber(torchLayer, sx, sy - 26);
-    k._emitT = t;
-    k._emitEvery = 120 + Math.random()*220;
-  }
-}
+      // искры “постоянно”
+      if(t - k._emitT > k._emitEvery){
+        spawnEmber(torchLayer, k.x, k.y - 26);
+        k._emitT = t;
+        k._emitEvery = 120 + Math.random()*220;
+      }
+    }
 
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 }
-
-
 
 document.addEventListener("DOMContentLoaded", ()=>{
   const overlay = $(".page-transition");
