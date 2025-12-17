@@ -408,8 +408,8 @@ class TorchRunner{
   onPointerDown(e){
     if(e.button !== 0) return;
     if(e.target.closest("a,button,input,textarea,select,label")) return;
-    this.tx = e.clientX;
-    this.ty = e.clientY;
+    this.tx = e.clientX + window.scrollX;
+    this.ty = e.clientY + window.scrollY;
     this.moving = true;
     this.runner.classList.add("walking");
   }
