@@ -1,8 +1,10 @@
 const $ = (q, root=document) => root.querySelector(q);
 const $$ = (q, root=document) => Array.from(root.querySelectorAll(q));
+const ASSET_BASE = location.pathname.includes("/hamartech-gamejam") ? "/hamartech-gamejam" : "";
+const assetPath = (p) => `${ASSET_BASE}${p}`;
 
 async function loadProjects(){
-  const res = await fetch("/assets/data/projects.json", { cache: "no-store" });
+  const res = await fetch(assetPath("/assets/data/projects.json"), { cache: "no-store" });
   if(!res.ok) throw new Error("Kunne ikke laste prosjekter");
   return await res.json();
 }

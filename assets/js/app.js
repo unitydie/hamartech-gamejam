@@ -456,9 +456,9 @@ class TorchRunner{
     }
   }
 
-  renderRunner(){
-    const x = this.rx - window.scrollX;
-    const y = this.ry - window.scrollY;
+  renderRunner(sx=window.scrollX, sy=window.scrollY){
+    const x = this.rx - sx;
+    const y = this.ry - sy;
     this.runner.style.left = x + "px";
     this.runner.style.top  = y + "px";
   }
@@ -504,7 +504,7 @@ class TorchRunner{
     this.runner.classList.add("walking");
   }
 
-  stepRunner(){
+  stepRunner(sx=window.scrollX, sy=window.scrollY){
     if(!this.moving) return;
     const dx = this.tx - this.rx;
     const dy = this.ty - this.ry;
@@ -520,19 +520,22 @@ class TorchRunner{
     }
     this.rx += (dx / dist) * speed;
     this.ry += (dy / dist) * speed;
-    this.renderRunner();
+    this.renderRunner(sx, sy);
   }
 
   tick(t){
+    const sx = window.scrollX;
+    const sy = window.scrollY;
     if(!this.active) return;
-    this.renderRunner();
-    this.stepRunner();
+    this.renderRunner(sx, sy);
+    this.stepRunner(sx, sy);
     for(const k of this.torches){
-      k.el.style.left = (k.x - window.scrollX) + "px";
-      k.el.style.top  = (k.y - window.scrollY) + "px";
-
-      k.hole.setAttribute("cx", k.x - window.scrollX);
-      k.hole.setAttribute("cy", k.y - window.scrollY);
+      const lx = k.x - sx;
+      const ly = k.y - sy;
+      k.el.style.left = lx + "px";
+      k.el.style.top  = ly + "px";
+      k.hole.setAttribute("cx", lx);
+      k.hole.setAttribute("cy", ly);
       const flick = Math.sin((t * 0.006) + k.seed) * this.FLICKER + (Math.random() - 0.5) * 6;
       k.hole.setAttribute("r", Math.max(120, k.baseR + flick));
       if(t - k._emitT > k._emitEvery){
@@ -778,12 +781,12 @@ class DragonGate{
     this.music.pause();
     this.music.currentTime = 0;
     this.musicStarted = false;
-    document.removeEventListener("click", this.unlockMusic, { capture: true, passive: true });
+    document.removeEventListener("click", this.unlockMusic, true);
   }
 
   unlockMusic(){
     this.startMusic();
-    document.removeEventListener("click", this.unlockMusic, { capture: true, passive: true });
+    document.removeEventListener("click", this.unlockMusic, true);
   }
 
   spawnArrow(sx, sy, tx, ty){
