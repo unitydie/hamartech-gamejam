@@ -6,6 +6,7 @@
    - Countdown
    - Page transitions
    - Toast + confetti
+   - Torch + runner overlay
 */
 
 const $ = (q, root=document) => root.querySelector(q);
@@ -23,22 +24,17 @@ function toast(msg){
 function pageTransition(){
   const overlay = document.querySelector(".page-transition");
   if(!overlay) return;
-  // Fade in on first paint
-  requestAnimationFrame(()=> {
-    overlay.classList.remove("on");
-  });
+  requestAnimationFrame(()=> overlay.classList.remove("on"));
 
-  // Fade out before navigation
   document.addEventListener("click", (e)=>{
     const a = e.target.closest("a");
     if(!a) return;
     const href = a.getAttribute("href");
     if(!href) return;
-    // internal page nav only (not anchors)
+
     const isAnchor = href.startsWith("#") || href.startsWith("/#");
-    const isSamePage = isAnchor;
     const isExternal = /^https?:\/\//.test(href) && !href.startsWith(location.origin);
-    if(isExternal || isSamePage) return;
+    if(isExternal || isAnchor) return;
     if(a.target === "_blank") return;
 
     e.preventDefault();
@@ -62,7 +58,6 @@ function smoothAnchors(){
     const y = target.getBoundingClientRect().top + window.scrollY - 82;
     window.scrollTo({ top: y, behavior: "smooth" });
 
-    // close mobile menu
     const links = $("#navLinks");
     if(links && links.classList.contains("open")){
       links.classList.remove("open");
@@ -115,7 +110,6 @@ function accordion(){
 
     btn.addEventListener("click", ()=>{
       const expanded = btn.getAttribute("aria-expanded") === "true";
-      // close others
       $$(".acc-item").forEach(b=>{
         if(b !== btn){
           b.setAttribute("aria-expanded", "false");
@@ -146,7 +140,6 @@ function setupCopyLink(){
 /* EDIT THESE for real event */
 const CONFIG = {
   theme: "Tema annonseres ved oppstart.",
-  // ISO format: YYYY-MM-DDTHH:MM:SS
   submitDeadline: "2026-01-15T18:00:00",
   timezoneLabel: "lokal tid",
 };
@@ -167,6 +160,7 @@ function countdown(){
     const now = new Date();
     let ms = target - now;
     if(ms < 0) ms = 0;
+
     const s = Math.floor(ms/1000);
     const days = Math.floor(s / 86400);
     const hours = Math.floor((s % 86400) / 3600);
@@ -216,11 +210,9 @@ function confettiBurst(){
 }
 
 function formUX(){
-  // Show a nice message on submit click (Netlify will handle actual submission)
   const submitBtn = $("#submitJamBtn");
   if(submitBtn){
     submitBtn.addEventListener("click", ()=>{
-      // only if form valid
       const form = submitBtn.closest("form");
       if(form && form.checkValidity()){
         toast("Sender inn... Lykke til!");
@@ -229,13 +221,6 @@ function formUX(){
     });
   }
 }
-
-// function spotlight(){
-//   window.addEventListener("pointermove", (e)=>{
-//     document.documentElement.style.setProperty("--mx", e.clientX + "px");
-//     document.documentElement.style.setProperty("--my", e.clientY + "px");
-//   }, { passive: true });
-// }
 
 function cardTilt(){
   const cards = document.querySelectorAll(".card, .feature, .badge, .project");
@@ -248,12 +233,11 @@ function cardTilt(){
       const y = (e.clientY - r.top) / r.height - 0.5;
       el.style.transform = `rotateX(${(-y*6).toFixed(2)}deg) rotateY(${(x*8).toFixed(2)}deg) translateY(-2px)`;
     });
-    el.addEventListener("mouseleave", ()=>{
-      el.style.transform = "";
-    });
+    el.addEventListener("mouseleave", ()=>{ el.style.transform = ""; });
   });
 }
 
+/* embers */
 function spawnEmber(layer, x, y){
   const e = document.createElement("span");
   e.className = "ember";
@@ -280,13 +264,13 @@ function spawnEmber(layer, x, y){
 
   setTimeout(()=> e.remove(), 1200);
 }
-
 function burstEmbers(layer, x, y, n=16){
   for(let i=0;i<n;i++){
     spawnEmber(layer, x + (Math.random()-0.5)*8, y + (Math.random()-0.5)*8);
   }
 }
 
+/* Torch + runner overlay */
 function torchRunnerMode(){
   const overlay = document.getElementById("torchOverlay");
   const svg = document.getElementById("torchSvg");
@@ -316,23 +300,21 @@ function torchRunnerMode(){
   resizeSvg();
   window.addEventListener("resize", resizeSvg);
 
-  const torches = [];
+  const torches = []; // {x,y,baseR,seed,el,hole,_emitT,_emitEvery}
 
   function addTorch(x, y){
-    // torch DOM
     const t = document.createElement("div");
     t.className = "torch";
     t.style.left = x + "px";
     t.style.top  = y + "px";
 
-    // flame DOM (ВАЖНО: иначе анимации огня не будет вообще)
+    // flame element (CSS anim)
     const flame = document.createElement("span");
     flame.className = "flame";
     t.appendChild(flame);
 
     torchLayer.appendChild(t);
 
-    // hole in mask
     const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     hole.setAttribute("cx", x);
     hole.setAttribute("cy", y);
@@ -359,7 +341,7 @@ function torchRunnerMode(){
     }
   }
 
-  // runner
+  // runner movement (fixed to viewport)
   let rx = w * 0.5, ry = h * 0.6;
   let tx = rx, ty = ry;
   let moving = false;
@@ -367,11 +349,11 @@ function torchRunnerMode(){
   runner.style.left = rx + "px";
   runner.style.top  = ry + "px";
 
+  // стартовый факел
   addTorch(rx, ry);
 
   window.addEventListener("pointerdown", (e)=>{
-    // не режем тач (у тача button может быть -1)
-    if(e.pointerType === "mouse" && e.button !== 0) return;
+    if(e.button !== 0) return;
     if(e.target.closest("a,button,input,textarea,select,label")) return;
 
     tx = e.clientX;
@@ -379,7 +361,7 @@ function torchRunnerMode(){
 
     moving = true;
     runner.classList.add("walking");
-  }, { capture: true });
+  }, { capture: true, passive: true });
 
   function stepRunner(){
     if(!moving) return;
@@ -408,7 +390,7 @@ function torchRunnerMode(){
     stepRunner();
 
     for(const k of torches){
-      // удерживаем “в экране”
+      // stay in viewport
       k.el.style.left = k.x + "px";
       k.el.style.top  = k.y + "px";
       k.hole.setAttribute("cx", k.x);
@@ -429,10 +411,9 @@ function torchRunnerMode(){
   requestAnimationFrame(tick);
 }
 
-
 document.addEventListener("DOMContentLoaded", ()=>{
   const overlay = $(".page-transition");
-  if(overlay) overlay.classList.add("on"); // start covered, fade out shortly
+  if(overlay) overlay.classList.add("on");
   setTimeout(()=> overlay && overlay.classList.remove("on"), 60);
 
   pageTransition();
@@ -443,7 +424,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   setupCopyLink();
   countdown();
   formUX();
- // spotlight();
   cardTilt();
   torchRunnerMode();
 });
