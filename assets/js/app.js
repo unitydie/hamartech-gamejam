@@ -535,14 +535,19 @@ class DragonGate{
     this.el = document.getElementById("dragon");
     this.torchRunner = torchRunner;
     this.clicks = 0;
+    this.vx = 0;
+    this.vy = 0;
     this.hitSfx = this.createAudio(assetPath("/assets/sfx/hit.mp3"), false, 0.75);
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
+    this.el.style.setProperty("position", "fixed", "important");
     this.setInitialPosition();
     this.onClick = this.onClick.bind(this);
     this.onResize = this.onResize.bind(this);
+    this.onScroll = this.onScroll.bind(this);
     this.el.addEventListener("click", this.onClick);
     window.addEventListener("resize", this.onResize);
+    window.addEventListener("scroll", this.onScroll, { passive: true });
   }
   createAudio(src, loop=false, volume=1){
     const a = new Audio(src);
@@ -561,6 +566,8 @@ class DragonGate{
     this.positionAt(x, y);
   }
   positionAt(x, y){
+    this.vx = x;
+    this.vy = y;
     this.el.style.right = "auto";
     this.el.style.left = `${x}px`;
     this.el.style.top = `${y}px`;
@@ -587,6 +594,7 @@ class DragonGate{
       this.el.style.opacity = "0";
       this.el.style.pointerEvents = "none";
       window.removeEventListener("resize", this.onResize);
+      window.removeEventListener("scroll", this.onScroll);
       if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
         this.torchRunner.revealAll();
       }
@@ -598,6 +606,10 @@ class DragonGate{
     if(this.clicks === 0){
       this.setInitialPosition();
     }
+  }
+  onScroll(){
+    // keep dragon locked to viewport coords even if layout changes with scroll
+    this.positionAt(this.vx, this.vy);
   }
 }
 

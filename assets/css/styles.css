@@ -574,6 +574,10 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   z-index: 5600 !important;
 }
 
+#dragon{
+  position: fixed !important;
+}
+
 @media (max-width: 520px){
   .grid-2{ grid-template-columns: 1fr; }
   .countdown{ grid-template-columns: 1fr 1fr; }
