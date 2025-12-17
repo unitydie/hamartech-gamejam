@@ -572,6 +572,7 @@ class DragonGate{
     this.fireballs = [];
     this.fireInterval = null;
     this.arrows = [];
+    this.finTimeout = null;
     if(!this.el) return;
     this.el.style.backgroundImage = `url("${assetPath("/assets/sfx/dragon.png")}")`;
     this.el.style.setProperty("position", "fixed", "important");
@@ -781,12 +782,44 @@ class DragonGate{
       this.stopFire();
       this.arrows.forEach(a=>a.el.remove());
       this.arrows = [];
-      if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
-        this.torchRunner.revealAll();
-      }
+      this.playFinAnimation().then(()=>{
+        if(this.torchRunner && typeof this.torchRunner.revealAll === "function"){
+          this.torchRunner.revealAll();
+        }
+      });
       return;
     }
     this.setRandomPosition();
+  }
+
+  playFinAnimation(){
+    return new Promise((resolve)=>{
+      const video = document.createElement("video");
+      video.src = assetPath("/assets/sfx/fin.mov");
+      video.autoplay = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.style.position = "fixed";
+      video.style.inset = "0";
+      video.style.width = "100vw";
+      video.style.height = "100vh";
+      video.style.objectFit = "cover";
+      video.style.zIndex = "9000";
+      video.style.pointerEvents = "none";
+      video.style.background = "black";
+
+      const cleanup = ()=>{
+        clearTimeout(this.finTimeout);
+        video.remove();
+        resolve();
+      };
+
+      video.addEventListener("ended", cleanup, { once: true });
+      document.body.appendChild(video);
+      video.play().catch(()=>{ cleanup(); });
+      // Fallback in case ended doesn't fire
+      this.finTimeout = setTimeout(cleanup, 6000);
+    });
   }
 }
 
