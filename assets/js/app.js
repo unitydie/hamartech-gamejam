@@ -569,6 +569,8 @@ class DragonGate{
     this.vx = 0;
     this.vy = 0;
     this.hitSfx = this.createAudio(assetPath("/assets/sfx/hit.mp3"), false, 0.75);
+    this.music = this.createAudio(assetPath("/assets/sfx/music.mp3"), true, 0.7);
+    this.musicStarted = false;
     this.fireballs = [];
     this.fireInterval = null;
     this.arrows = [];
@@ -583,9 +585,11 @@ class DragonGate{
     this.onClick = this.onClick.bind(this);
     this.onResize = this.onResize.bind(this);
     this.onScroll = this.onScroll.bind(this);
+    this.unlockMusic = this.unlockMusic.bind(this);
     this.el.addEventListener("click", this.onClick);
     window.addEventListener("resize", this.onResize);
     window.addEventListener("scroll", this.onScroll, { passive: true });
+    document.addEventListener("click", this.unlockMusic, { capture: true, passive: true });
     this.startFire();
   }
   createAudio(src, loop=false, volume=1){
@@ -714,6 +718,25 @@ class DragonGate{
     this.fireballs = this.fireballs.filter(k=>k!==fb);
   }
 
+  startMusic(){
+    if(!this.music || this.musicStarted) return;
+    this.musicStarted = true;
+    this.music.play().catch(()=>{});
+  }
+
+  stopMusic(){
+    if(!this.music) return;
+    this.music.pause();
+    this.music.currentTime = 0;
+    this.musicStarted = false;
+    document.removeEventListener("click", this.unlockMusic, { capture: true, passive: true });
+  }
+
+  unlockMusic(){
+    this.startMusic();
+    document.removeEventListener("click", this.unlockMusic, { capture: true, passive: true });
+  }
+
   spawnArrow(sx, sy, tx, ty){
     const el = document.createElement("div");
     el.className = "arrow";
@@ -780,6 +803,7 @@ class DragonGate{
       window.removeEventListener("resize", this.onResize);
       window.removeEventListener("scroll", this.onScroll);
       this.stopFire();
+      this.stopMusic();
       this.arrows.forEach(a=>a.el.remove());
       this.arrows = [];
       this.playFinAnimation().then(()=>{
