@@ -268,6 +268,7 @@ class TorchRunner{
     this.darkRect = document.getElementById("torchDarkRect");
     this.lightsG = document.getElementById("torchMaskLights");
     this.torchLayer = document.getElementById("torchLayer");
+    this.torchHost = this.torchLayer || document.body;
     this.runner = document.getElementById("runner");
     this.ready = !!(this.overlay && this.svg && this.maskRect && this.darkRect && this.lightsG && this.torchLayer && this.runner);
     if(!this.ready) return;
@@ -309,12 +310,18 @@ class TorchRunner{
   lockLayers(){
     this.overlay.style.setProperty("position", "fixed", "important");
     this.overlay.style.setProperty("inset", "0", "important");
+    this.overlay.style.setProperty("width", "100vw", "important");
+    this.overlay.style.setProperty("height", "100vh", "important");
     this.overlay.style.setProperty("pointer-events", "none", "important");
     this.overlay.style.setProperty("z-index", "5000", "important");
+
     this.torchLayer.style.setProperty("position", "fixed", "important");
     this.torchLayer.style.setProperty("inset", "0", "important");
+    this.torchLayer.style.setProperty("width", "100vw", "important");
+    this.torchLayer.style.setProperty("height", "100vh", "important");
     this.torchLayer.style.setProperty("pointer-events", "none", "important");
     this.torchLayer.style.setProperty("z-index", "5500", "important");
+
     this.runner.style.setProperty("position", "fixed", "important");
     this.runner.style.setProperty("pointer-events", "none", "important");
     this.runner.style.setProperty("z-index", "6000", "important");
@@ -337,12 +344,12 @@ class TorchRunner{
     t.style.setProperty("pointer-events", "none", "important");
     t.style.left = x + "px";
     t.style.top  = y + "px";
-    t.style.zIndex = "5501";
+    t.style.zIndex = "5600";
 
     const flame = document.createElement("span");
     flame.className = "flame";
     t.appendChild(flame);
-    this.torchLayer.appendChild(t);
+    this.torchHost.appendChild(t);
 
     const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     hole.setAttribute("cx", x);

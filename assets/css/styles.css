@@ -412,6 +412,8 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 .torch-layer{
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 5500;
   pointer-events: none;
 }
@@ -543,6 +545,8 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 #torchLayer{
   position: fixed !important;
   inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
 #runner{
@@ -552,6 +556,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 .torch{
   position: fixed !important; /* ключевое: теперь факел вообще не может “уехать” со скроллом */
   pointer-events: none !important;
+  z-index: 5600 !important;
 }
 
 @media (max-width: 520px){
