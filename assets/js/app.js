@@ -386,26 +386,33 @@ this.runner.style.top  = (this.ry - window.scrollY) + "px";
 }
 
   spawnEmber(x, y){
-    const e = document.createElement("span");
-    e.className = "ember";
-    const palette = ["#ffcf7a", "#ff9a4a", "#ff6a33"];
-    e.style.background = palette[(Math.random()*palette.length)|0];
-    const size = 2 + ((Math.random()*3)|0);
-    e.style.width = size + "px";
-    e.style.height = size + "px";
-    e.style.left = x + "px";
-    e.style.top  = y + "px";
-    this.torchLayer.appendChild(e);
+  const e = document.createElement("span");
+  e.className = "ember";
 
-    const dx = (Math.random()-0.5) * 26;
-    const dy = -(18 + Math.random()*42);
-    const rot = (Math.random()*140 - 70);
-    e.animate([
-      { transform: "translate(-50%,-50%) translate(0,0) rotate(0deg)", opacity: 0.95 },
-      { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity: 0 }
-    ], { duration: 520 + Math.random()*420, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
-    setTimeout(()=> e.remove(), 1200);
-  }
+  const palette = ["#ffcf7a", "#ff9a4a", "#ff6a33"];
+  e.style.background = palette[(Math.random()*palette.length)|0];
+
+  const size = 2 + ((Math.random()*3)|0);
+  e.style.width = size + "px";
+  e.style.height = size + "px";
+
+  // 🔑 ВАЖНО
+  e.style.left = (x - window.scrollX) + "px";
+  e.style.top  = (y - window.scrollY) + "px";
+
+  this.torchLayer.appendChild(e);
+
+  const dx = (Math.random()-0.5) * 26;
+  const dy = -(18 + Math.random()*42);
+  const rot = (Math.random()*140 - 70);
+
+  e.animate([
+    { transform: "translate(-50%,-50%) translate(0,0) rotate(0deg)", opacity: 0.95 },
+    { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot}deg)`, opacity: 0 }
+  ], { duration: 520 + Math.random()*420, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+
+  setTimeout(()=> e.remove(), 1200);
+}
 
   burstEmbers(x, y, n=16){
     for(let i=0;i<n;i++){
