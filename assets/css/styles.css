@@ -400,16 +400,6 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   transform: translateX(-50%) translateY(-2px);
 }
 
-.torch{
-  position: fixed; /* keep torches pinned to the viewport */
-  width: 18px;
-  height: 28px;
-  transform: translate(-50%,-100%);
-  image-rendering: pixelated;
-  background-repeat: no-repeat;
-  background-size: 400% 100%;
-}
-/* Overlay (darkness with holes) */
 .torch-overlay{
   position: fixed;
   inset: 0;
