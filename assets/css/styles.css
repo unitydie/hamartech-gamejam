@@ -411,7 +411,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 }
 /* Overlay (darkness with holes) */
 .torch-overlay{
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 5000;
   pointer-events: none;
