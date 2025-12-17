@@ -538,8 +538,8 @@ class JamApp{
   await this.audio.init();
 
   await Promise.all([
-    this.audio.load("step", "/hamartech-gamejam/assets/sfx/step.wav"),
-    this.audio.load("fire", "/hamartech-gamejam/assets/sfx/fire.wav")
+    this.audio.load("step", "/hamartech-gamejam/assets/sfx/step.oog"),
+    this.audio.load("fire", "/hamartech-gamejam/assets/sfx/fire.mp3")
   ]);
 
   window.__jamAudio = this.audio;
