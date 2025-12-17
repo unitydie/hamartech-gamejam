@@ -316,23 +316,23 @@ function torchRunnerMode(){
   resizeSvg();
   window.addEventListener("resize", resizeSvg);
 
-  const torches = []; // {x,y,baseR,seed,el,hole,_emitT,_emitEvery}
+  const torches = [];
 
   function addTorch(x, y){
-    // DOM torch
+    // torch DOM
     const t = document.createElement("div");
     t.className = "torch";
     t.style.left = x + "px";
     t.style.top  = y + "px";
 
-    // если хочешь огонь отдельным элементом — раскомментируй:
-    // const flame = document.createElement("span");
-    // flame.className = "flame";
-    // t.appendChild(flame);
+    // flame DOM (ВАЖНО: иначе анимации огня не будет вообще)
+    const flame = document.createElement("span");
+    flame.className = "flame";
+    t.appendChild(flame);
 
     torchLayer.appendChild(t);
 
-    // SVG hole (дырка в темноте)
+    // hole in mask
     const hole = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     hole.setAttribute("cx", x);
     hole.setAttribute("cy", y);
@@ -350,10 +350,8 @@ function torchRunnerMode(){
       _emitEvery: 120 + Math.random()*220
     });
 
-    // искры при установке
     burstEmbers(torchLayer, x, y - 18, 18);
 
-    // limit
     while(torches.length > MAX_TORCHES){
       const old = torches.shift();
       old.el.remove();
@@ -361,7 +359,7 @@ function torchRunnerMode(){
     }
   }
 
-  // runner movement (по экрану)
+  // runner
   let rx = w * 0.5, ry = h * 0.6;
   let tx = rx, ty = ry;
   let moving = false;
@@ -369,12 +367,11 @@ function torchRunnerMode(){
   runner.style.left = rx + "px";
   runner.style.top  = ry + "px";
 
-  // стартовый факел
   addTorch(rx, ry);
 
-  // ставим цель кликом
   window.addEventListener("pointerdown", (e)=>{
-    if(e.button !== 0) return;
+    // не режем тач (у тача button может быть -1)
+    if(e.pointerType === "mouse" && e.button !== 0) return;
     if(e.target.closest("a,button,input,textarea,select,label")) return;
 
     tx = e.clientX;
@@ -411,17 +408,15 @@ function torchRunnerMode(){
     stepRunner();
 
     for(const k of torches){
-      // держим факелы на экране (НЕ зависит от scroll)
+      // удерживаем “в экране”
       k.el.style.left = k.x + "px";
       k.el.style.top  = k.y + "px";
       k.hole.setAttribute("cx", k.x);
       k.hole.setAttribute("cy", k.y);
 
-      // мерцание (фликер)
       const flick = Math.sin((t * 0.006) + k.seed) * FLICKER + (Math.random() - 0.5) * 6;
       k.hole.setAttribute("r", Math.max(120, k.baseR + flick));
 
-      // искры “постоянно”
       if(t - k._emitT > k._emitEvery){
         spawnEmber(torchLayer, k.x, k.y - 26);
         k._emitT = t;
@@ -433,6 +428,7 @@ function torchRunnerMode(){
   }
   requestAnimationFrame(tick);
 }
+
 
 document.addEventListener("DOMContentLoaded", ()=>{
   const overlay = $(".page-transition");

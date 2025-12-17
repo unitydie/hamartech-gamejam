@@ -548,6 +548,20 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   }
 }
 
+#torchOverlay,
+#torchLayer{
+  position: fixed !important;
+  inset: 0 !important;
+}
+
+#runner{
+  position: fixed !important;
+}
+
+.torch{
+  position: fixed !important; /* ключевое: теперь факел вообще не может “уехать” со скроллом */
+}
+
 @media (max-width: 520px){
   .grid-2{ grid-template-columns: 1fr; }
   .countdown{ grid-template-columns: 1fr 1fr; }
