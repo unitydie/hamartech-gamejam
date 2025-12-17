@@ -7,10 +7,11 @@
   <meta name="description" content="HamarTech GameJam – meld deg på, lag et spill, og send inn bidraget ditt." />
   <link rel="icon" href="./assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="./assets/css/styles.css" />
+  <link rel="stylesheet" href="./assets/css/styles.css?v=fix-torch" />
 </head>
 <body>
-  <div id="torchOverlay" class="torch-overlay" aria-hidden="true">
+  <div id="torchOverlay" class="torch-overlay" aria-hidden="true"
+       style="position:fixed; inset:0; z-index:5000; pointer-events:none;">
   <svg id="torchSvg" class="torch-svg" preserveAspectRatio="none">
     <defs>
       <filter id="torchBlur" x="-50%" y="-50%" width="200%" height="200%">
@@ -28,8 +29,10 @@
   </svg>
 </div>
 
-<div id="torchLayer" class="torch-layer" aria-hidden="true"></div>
-<div id="runner" class="runner" aria-hidden="true"></div>
+<div id="torchLayer" class="torch-layer" aria-hidden="true"
+     style="position:fixed; inset:0; z-index:5500; pointer-events:none;"></div>
+<div id="runner" class="runner" aria-hidden="true"
+     style="position:fixed; z-index:6000; pointer-events:none;"></div>
   <div class="page-transition" aria-hidden="true"></div>
 
   <header class="site-header">
@@ -391,6 +394,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="./assets/js/app.js" defer></script>
+  <script src="./assets/js/app.js?v=fix-torch" defer></script>
 </body>
 </html>

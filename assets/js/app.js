@@ -281,14 +281,18 @@ function torchRunnerMode(){
   const runner = document.getElementById("runner");
   if(!overlay || !svg || !maskRect || !darkRect || !lightsG || !torchLayer || !runner) return;
 
-  // ensure overlay and torch layer stay pinned to the viewport
-  overlay.style.position = "fixed";
-  overlay.style.left = overlay.style.top = overlay.style.right = overlay.style.bottom = "0";
-  overlay.style.pointerEvents = "none";
-  torchLayer.style.position = "fixed";
-  torchLayer.style.left = torchLayer.style.top = torchLayer.style.right = torchLayer.style.bottom = "0";
-  torchLayer.style.pointerEvents = "none";
-  runner.style.position = "fixed";
+  // ensure overlay and torch layer stay pinned to the viewport (force with !important)
+  overlay.style.setProperty("position", "fixed", "important");
+  overlay.style.setProperty("inset", "0", "important");
+  overlay.style.setProperty("pointer-events", "none", "important");
+  overlay.style.setProperty("z-index", "5000", "important");
+  torchLayer.style.setProperty("position", "fixed", "important");
+  torchLayer.style.setProperty("inset", "0", "important");
+  torchLayer.style.setProperty("pointer-events", "none", "important");
+  torchLayer.style.setProperty("z-index", "5500", "important");
+  runner.style.setProperty("position", "fixed", "important");
+  runner.style.setProperty("pointer-events", "none", "important");
+  runner.style.setProperty("z-index", "6000", "important");
 
   const MAX_TORCHES = 7;
   const BASE_R = 220;
@@ -314,10 +318,11 @@ function torchRunnerMode(){
   function addTorch(x, y){
     const t = document.createElement("div");
     t.className = "torch";
-    t.style.position = "fixed"; // anchor torch to viewport, not the scrolled document
-    t.style.pointerEvents = "none";
+    t.style.setProperty("position", "fixed", "important"); // anchor to viewport
+    t.style.setProperty("pointer-events", "none", "important");
     t.style.left = x + "px";
     t.style.top  = y + "px";
+    t.style.zIndex = "5501";
 
     // flame element (CSS anim)
     const flame = document.createElement("span");

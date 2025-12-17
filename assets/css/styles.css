@@ -449,6 +449,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
   background-repeat: no-repeat;
   background-size: 400% 100%;
   background-image: url("/hamartech-gamejam/assets/img/torch.png");
+  pointer-events: none;
 }
 .torch::before{
   /* зелёный ореол вокруг факела (не закрывает контент) */
@@ -550,6 +551,7 @@ code{ background: rgba(255,255,255,.08); padding:.2rem .35rem; border-radius: 8p
 
 .torch{
   position: fixed !important; /* ключевое: теперь факел вообще не может “уехать” со скроллом */
+  pointer-events: none !important;
 }
 
 @media (max-width: 520px){
