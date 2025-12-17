@@ -493,6 +493,8 @@ class TorchRunner{
 
   onPointerDown(e){
     if(e.button !== 0) return;
+    if(!this.alive) return;
+    if(e.target.closest("#dragon")) return;
     if(e.target.closest("a,button,input,textarea,select,label")) return;
     this.unlockAudio();
     this.tx = e.clientX + window.scrollX;
