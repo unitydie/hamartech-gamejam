@@ -5,8 +5,26 @@ const assetPath = (p) => `${ASSET_BASE}${p}`;
 const STORAGE_KEY = "jam_submissions_v1";
 
 function loadLocalSubmissions(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : [];
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  }catch(err){
+    console.warn("Kunne ikke lese lokale innsendinger", err);
+    return [];
+  }
+}
+
+function normalizeSubmissions(list){
+  return list
+    .map(item=>{
+      if(item && typeof item === "object") return item;
+      if(typeof item === "string"){
+        try{ return JSON.parse(item); }catch{return null;}
+      }
+      return null;
+    })
+    .filter(Boolean);
 }
 
 function renderLocal(){
@@ -14,18 +32,24 @@ function renderLocal(){
   const empty = $("#empty");
   if(!grid) return;
 
-  const submissions = loadLocalSubmissions().filter(s=>s._form === "submit");
+  const submissions = normalizeSubmissions(loadLocalSubmissions()).filter(s=>{
+    if(s._form === "submit") return true;
+    // Fallback for eldre data uten _form flagg
+    return !!(s.title || s.author || s.link || s.description);
+  });
+
   if(submissions.length === 0){
     grid.innerHTML = "";
     if(empty){
       empty.hidden = false;
-      empty.innerHTML = `<p>Ingen lokale innsendinger ennå. Send inn fra forsiden og åpne denne siden i samme nettleser.</p>`;
+      empty.innerHTML = `<p>Ingen lokale innsendinger enda. Send inn fra forsiden og apne denne siden i samme nettleser.</p>`;
     }
     return;
   }
 
+  const safe = (v="")=> String(v).replaceAll("<","&lt;").replaceAll(">","&gt;");
+
   grid.innerHTML = submissions.map(s=>{
-    const safe = (v="")=> String(v).replaceAll("<","&lt;").replaceAll(">","&gt;");
     const tags = (s.tags || s.engine || "").toString();
     return `
       <article class="project reveal is-visible">
