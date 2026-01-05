@@ -17,6 +17,7 @@ const JAM_CONFIG = {
   timezoneLabel: "lokal tid",
 };
 const ASSET_BASE = location.pathname.includes("/hamartech-gamejam") ? "/hamartech-gamejam" : "";
+const API_BASE = ASSET_BASE;
 const assetPath = (p) => `${ASSET_BASE}${p}`;
 const STORAGE_KEY = "jam_submissions_v1";
 
@@ -261,13 +262,29 @@ function saveSubmission(entry){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
 }
 
-function attachLocalForms(){
+async function sendSubmissionToApi(entry){
+  try{
+    const res = await fetch(`${API_BASE}/api/submissions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+    if(!res.ok) throw new Error("bad status");
+    const json = await res.json().catch(()=>null);
+    return json;
+  }catch(err){
+    console.warn("Klarte ikke å lagre på server (API)", err);
+    return null;
+  }
+}
+
+function attachLocalForms(toaster){
   const registerForm = document.forms["gamejam-register"];
   const submitForm = document.forms["gamejam-submit"];
 
   const bind = (form, name)=>{
     if(!form) return;
-    form.addEventListener("submit", (e)=>{
+    form.addEventListener("submit", async (e)=>{
       e.preventDefault();
       const btn = form.querySelector("button[type=submit]");
       if(btn) btn.disabled = true;
@@ -282,7 +299,12 @@ function attachLocalForms(){
       });
       payload._form = name;
       saveSubmission(payload);
-      toast("Sendt! Lagret lokalt.");
+      const apiResult = await sendSubmissionToApi(payload);
+      if(apiResult){
+        toaster?.show?.("Sendt! Lagret på server og lokalt.");
+      }else{
+        toaster?.show?.("Sendt! Lagret lokalt (API utilgjengelig).");
+      }
       form.reset();
       if(btn) btn.disabled = false;
     });
@@ -986,7 +1008,7 @@ class JamApp{
     new CopyLink(this.toast);
     new Countdown(this.config);
     new FormUX(this.toast);
-    attachLocalForms();
+    attachLocalForms(this.toast);
     new CardTilt();
     this.torchRunner = new TorchRunner();
     this.dragonGate = new DragonGate(this.torchRunner);
